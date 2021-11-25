@@ -7,15 +7,33 @@ echo Latest:
 deployhtml="$(curl -fsSL https://mattermost.com/deploy/)"
 deployver="$(printf %s\\n "$deployhtml" | sed -n 's/^\s*\(<[^<]*class="release-text-left-latest"\)/  \1/p' | sed -e 's/.*>\s*\(.*\)\s*<.*/\1/')"
 printf "  Deploy version: %s\\n" "$deployver"
+installedvermajor="${installedver%%.*}"
 deploydate="$(printf %s\\n "$deployhtml" | sed -n 's/^\s*\(<[^<]*class="release-text-left-date"\)/  \1/p' | sed -e 's/.*>\s*\(.*\)\s*<.*/\1/')"
 printf "  Deploy date: %s\\n" "$deploydate"
-vahtmlsubset="$(curl -fsSL https://docs.mattermost.com/upgrade/version-archive.html | grep '<code\b.*\bhttps://releases\.mattermost\.com/[^d/][^/]*/mattermost-team-' -A1)"
+vahtml="$(curl -fsSL https://docs.mattermost.com/upgrade/version-archive.html)"
+vahtmlsubset="$(printf %s\\n "$vahtml" | grep '<code\b.*\bhttps://releases\.mattermost\.com/[^d/][^/]*/mattermost-team-'"$installedvermajor" -A1)"
 archiveurl="$(printf %s\\n "$vahtmlsubset" | sed -n '1s#.*\b\(https://releases\.mattermost\.com/[^d/][^/]*/mattermost-team-[^"<>]*linux-amd64\.\(tar\.\|t\)\(gz\|bz2\|xz\|zst\)\).*#\1#p')"
-printf "  Archive URL: %s\\n" "$archiveurl"
 archiveurlver="$(printf %s\\n "$archiveurl" | sed -e 's#.*\bhttps://releases\.mattermost\.com/\([^d/][^/]*\).*#\1#')"
-printf "  Archive URL version: %s\\n" "$archiveurlver"
 archivesum="$(printf %s\\n "$vahtmlsubset" | sed -En '2s#.*[^0-9a-fA-F]([0-9a-fA-F]{64})[^0-9a-fA-F].*#\1#p')"
+majorupgradevahtmlsubset="$(printf %s\\n "$vahtml" | grep '<code\b.*\bhttps://releases\.mattermost\.com/[^d/][^/]*/mattermost-team-' -A1)"
+majorupgradearchiveurl="$(printf %s\\n "$majorupgradevahtmlsubset" | sed -n '1s#.*\b\(https://releases\.mattermost\.com/[^d/][^/]*/mattermost-team-[^"<>]*linux-amd64\.\(tar\.\|t\)\(gz\|bz2\|xz\|zst\)\).*#\1#p')"
+if test "$majorupgradearchiveurl" != "$archiveurl" ; then
+    majorupgradearchiveurlver="$(printf %s\\n "$majorupgradearchiveurl" | sed -e 's#.*\bhttps://releases\.mattermost\.com/\([^d/][^/]*\).*#\1#')"
+    majorupgradearchivesum="$(printf %s\\n "$majorupgradevahtmlsubset" | sed -En '2s#.*[^0-9a-fA-F]([0-9a-fA-F]{64})[^0-9a-fA-F].*#\1#p')"
+fi
+if test "${1:-}" = major ; then
+    archiveurl="$majorupgradearchiveurl"
+    archiveurlver="$majorupgradearchiveurlver"
+    archivesum="$majorupgradearchivesum"
+fi
+printf "  Archive URL: %s\\n" "$archiveurl"
+printf "  Archive URL version: %s\\n" "$archiveurlver"
 printf "  Archive SHA-256: %s\\n" "$archivesum"
+if test "${1:-}" != major ; then
+    printf "  Major Upgrade Archive URL: %s\\n" "$majorupgradearchiveurl"
+    printf "  Major Upgrade Archive URL version: %s\\n" "$majorupgradearchiveurlver"
+    printf "  Major Upgrade Archive SHA-256: %s\\n" "$majorupgradearchivesum"
+fi
 if test -z "$deployver" ; then
     echo Could not extract latest deploy version. >&2 ; exit 1
 fi

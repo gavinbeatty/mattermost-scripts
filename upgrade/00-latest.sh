@@ -48,6 +48,9 @@ archive="$(basename "$archiveurl")"
 echo =======
 if ! (cd ~/dl && echo "SHA256 ($archive) = $archivesum" | sha256sum -c --strict >/dev/null 2>/dev/null) ; then
     (cd ~/dl && curl -fsSLO "$archiveurl" && echo DOWNLOADED: ~/dl/"$archive")
+    if ! (cd ~/dl && echo "SHA256 ($archive) = $archivesum" | sha256sum -c --strict >/dev/null 2>/dev/null) ; then
+        echo "Downloaded ~/dl/$archive from $archiveurl does not match SHA-256 $archivesum" >&2 ; exit 1
+    fi
 fi
 echo LATEST: ~/dl/"$archive"
 echo =======

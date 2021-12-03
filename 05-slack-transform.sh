@@ -12,6 +12,6 @@ mkdir "$2.mmetl" || { echo "Found pre-existing $2.mmetl/ directory meaning not s
 mmetl transform slack --team "$1" --file "$2" --output "$2.mmetl/mattermost_import.jsonl" | tee "$(date -Iseconds)-slack-transform.log"
 (cd "$2.mmetl" && mkdir -p bulk-export-attachments && zip -r "../$(basename "$2").mmetl.zip" bulk-export-attachments mattermost_import.jsonl)
 chmod g+r "$2.mmetl.zip"
-bash -c 'printf %q\  sudo chgrp mattermost "$2.mmetl.zip" && echo' bash "$2"
+/usr/bin/printf %q\  sudo chgrp mattermost "$2.mmetl.zip" && echo
 read -p 'Execute? [y/N]: ' go
 test "$go" != y || sudo chgrp mattermost "$2.mmetl.zip"

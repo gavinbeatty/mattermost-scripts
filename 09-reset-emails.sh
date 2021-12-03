@@ -10,6 +10,6 @@ while test $# -gt 0 ; do
     shift
 done
 test $e -eq 0 || exit
-echo "$ues" | bash -c 'while read u e ; do printf %q\  sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user email "$u" "$e" && echo && printf %q\  sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user reset_password "$e" && echo ; done' bash
+echo "$ues" | dash -c 'while read u e ; do /usr/bin/printf %q\  sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user email "$u" "$e" && echo && /usr/bin/printf %q\  sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user reset_password "$e" && echo ; done' dash
 read -p 'Execute? [y/N]: ' go
 test "$go" != y || { echo "$ues" | dash -c 'while read u e ; do sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user email "$u" "$e" && sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict user reset_password "$e" ; done' dash ; }

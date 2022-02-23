@@ -2,7 +2,7 @@
 cd /
 echo Running:
 # fmt.Sprintf("  Server version %v.%v.%v.%v", model.CurrentVersion, model.BuildNumber, c.App.ClientConfigHash(), c.App.Srv().License() != nil)
-running="$(sudo -u mattermost /opt/mattermost/bin/mmctl --local --strict system version 2>/dev/null | sed -n 's/^[A-Z]/  &/p')"
+running="$(sudo -u mattermost env MMCTL_LOCAL_SOCKET_PATH=/var/run/mattermost/local.socket /opt/mattermost/bin/mmctl --local --strict system version 2>/dev/null | sed -n 's/^[A-Z]/  &/p')"
 runningvers="$(printf %s\\n "$running" | sed -e 's/^\s*Server version \(.*\)\.[a-f0-9]\{32\}\..*/\1/')"
 runningdots="$(printf %s\\n "$runningvers" | tr -d 'a-zA-Z0-9\n' | wc -c)"
 runningver="$(printf %s\\n "$runningvers" | awk -F. "{print $(seq 1 $((runningdots/2)) | xargs -rd\\n printf '$%d "." ') \$$((runningdots/2 + 1))}")"
